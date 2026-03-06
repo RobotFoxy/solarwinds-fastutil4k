@@ -54,10 +54,14 @@ spotless {
 }
 
 subprojects {
+    val isBenchmarkModule = name == "benchmark"
+
     apply(plugin = "java-library")
-    apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "org.jetbrains.dokka")
+    if (!isBenchmarkModule) {
+        apply(plugin = "maven-publish")
+        apply(plugin = "org.jetbrains.dokka")
+    }
 
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -68,85 +72,87 @@ subprojects {
         jvmToolchain(8)
     }
 
-    tasks.register<Jar>("sourcesJar") {
-        archiveClassifier.set("sources")
-        dependsOn("compileJava")
-        dependsOn("compileKotlin")
-        from(sourceSets.main.map { it.allSource })
-    }
-
-    tasks.register<Jar>("javadocJar") {
-        archiveClassifier.set("javadoc")
-        from(tasks.javadoc)
-    }
-
-    tasks.withType<Jar> {
-        manifest {
-            attributes(
-                "Implementation-Title" to projectName,
-                "Implementation-Version" to version,
-                "Implementation-Vendor" to authorId,
-            )
+    if (!isBenchmarkModule) {
+        tasks.register<Jar>("sourcesJar") {
+            archiveClassifier.set("sources")
+            dependsOn("compileJava")
+            dependsOn("compileKotlin")
+            from(sourceSets.main.map { it.allSource })
         }
 
-        // Include LICENSE file in the JAR
-        from(rootProject.file("LICENSE")) {
-            into("META-INF/")
+        tasks.register<Jar>("javadocJar") {
+            archiveClassifier.set("javadoc")
+            from(tasks.javadoc)
         }
-    }
 
-    tasks.withType<PublishToMavenRepository> {
-        dependsOn(tasks.test)
-    }
+        tasks.withType<Jar> {
+            manifest {
+                attributes(
+                    "Implementation-Title" to projectName,
+                    "Implementation-Version" to version,
+                    "Implementation-Vendor" to authorId,
+                )
+            }
 
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                from(components["java"])
-                artifact(tasks["sourcesJar"])
-                artifact(tasks["javadocJar"])
-
-                pom {
-                    name.set(projectName)
-                    description.set(projectDescription)
-                    url.set(projectUrl)
-
-                    licenses {
-                        license {
-                            name.set("The MIT License")
-                            url.set("https://opensource.org/licenses/MIT")
-                            distribution.set("repo")
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id.set(authorId)
-                            name.set(authorName)
-                            organization.set("ccbluex")
-                        }
-                    }
-
-                    scm {
-                        connection.set("scm:git:git://github.com/ccbluex/$projectName.git")
-                        developerConnection.set("scm:git:ssh://github.com:ccbluex/$projectName.git")
-                        url.set(projectUrl)
-                    }
-                }
+            // Include LICENSE file in the JAR
+            from(rootProject.file("LICENSE")) {
+                into("META-INF/")
             }
         }
 
-        repositories {
-            mavenLocal()
-            maven {
-                name = "ccbluex-maven"
-                url = uri("https://maven.ccbluex.net/releases")
-                credentials {
-                    username = System.getenv("MAVEN_TOKEN_NAME")
-                    password = System.getenv("MAVEN_TOKEN_SECRET")
+        tasks.withType<PublishToMavenRepository> {
+            dependsOn(tasks.test)
+        }
+
+        publishing {
+            publications {
+                create<MavenPublication>("mavenJava") {
+                    from(components["java"])
+                    artifact(tasks["sourcesJar"])
+                    artifact(tasks["javadocJar"])
+
+                    pom {
+                        name.set(projectName)
+                        description.set(projectDescription)
+                        url.set(projectUrl)
+
+                        licenses {
+                            license {
+                                name.set("The MIT License")
+                                url.set("https://opensource.org/licenses/MIT")
+                                distribution.set("repo")
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id.set(authorId)
+                                name.set(authorName)
+                                organization.set("ccbluex")
+                            }
+                        }
+
+                        scm {
+                            connection.set("scm:git:git://github.com/ccbluex/$projectName.git")
+                            developerConnection.set("scm:git:ssh://github.com:ccbluex/$projectName.git")
+                            url.set(projectUrl)
+                        }
+                    }
                 }
-                authentication {
-                    create<BasicAuthentication>("basic")
+            }
+
+            repositories {
+                mavenLocal()
+                maven {
+                    name = "ccbluex-maven"
+                    url = uri("https://maven.ccbluex.net/releases")
+                    credentials {
+                        username = System.getenv("MAVEN_TOKEN_NAME")
+                        password = System.getenv("MAVEN_TOKEN_SECRET")
+                    }
+                    authentication {
+                        create<BasicAuthentication>("basic")
+                    }
                 }
             }
         }

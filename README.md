@@ -6,6 +6,7 @@ This repository is a multi-module Gradle project:
 
 - `fastutil4k-extensions-only`: generated and hand-written inline Kotlin extension APIs for fastutil and JDK collections.
 - `fastutil4k-more-collections`: additional collection implementations built with fastutil data structures.
+- `benchmark`: JMH benchmarks for local performance measurement (not published).
 
 ## Modules
 
@@ -38,6 +39,15 @@ Provides higher-level collection utilities and data structures, including:
   `weightedFilterSortedBy*`, `weightedMinByOrNull*`, `weightedMaxByOrNull*`
 - stepped float/double ranges returning fastutil lists (`ClosedRange<Double>.step`, `ClosedRange<Float>.step`)
 
+### `benchmark`
+
+Independent JMH module for performance testing:
+
+- core benchmarks for `Pool`, `LfuCache`, `WeightedSortedList`, `Ranges`
+- transform benchmark:
+  `mapToArray { }.asList()` vs `collection.map` vs `sequence.map.toList` vs `stream.map.toList`
+- not part of publish artifacts
+
 ## Requirements
 
 - JDK 8+ (toolchain target is Java 8)
@@ -48,6 +58,29 @@ Provides higher-level collection utilities and data structures, including:
 ```bash
 ./gradlew clean build
 ```
+
+`benchmark` is intentionally skipped in normal `build/check/test` lifecycle.
+
+## Run Benchmarks
+
+```bash
+# Compile JMH sources
+./gradlew :benchmark:compileJmhKotlin
+
+# Smoke run (single benchmark class, short run)
+./gradlew :benchmark:jmh --no-configuration-cache \
+  -Pjmh.includes=MapTransformBenchmark \
+  -Pjmh.warmupIterations=1 \
+  -Pjmh.iterations=1 \
+  -Pjmh.fork=1
+
+# Full benchmark suite
+./gradlew :benchmark:jmh --no-configuration-cache
+```
+
+JMH JSON output path:
+
+- `benchmark/build/reports/jmh/results.json`
 
 ## Regenerate extension sources
 
