@@ -1,0 +1,71 @@
+name: Benchmark (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      includes:
+        description: "JMH includes regex (optional, e.g. MapTransformBenchmark)"
+        required: false
+        default: ""
+      warmup_iterations:
+        description: "Warmup iterations"
+        required: true
+        default: "2"
+      iterations:
+        description: "Measurement iterations"
+        required: true
+        default: "3"
+      fork:
+        description: "Fork count"
+        required: true
+        default: "1"
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run JMH benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          CMD=("./gradlew" ":benchmark:jmh" "--no-configuration-cache" \
+            "-Pjmh.warmupIterations=${{ github.event.inputs.warmup_iterations }}" \
+            "-Pjmh.iterations=${{ github.event.inputs.iterations }}" \
+            "-Pjmh.fork=${{ github.event.inputs.fork }}")
+          if [[ -n "${{ github.event.inputs.includes }}" ]]; then
+            CMD+=("-Pjmh.includes=${{ github.event.inputs.includes }}")
+          fi
+          "${CMD[@]}"
+
+      - name: Upload JMH JSON result
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmh-results
+          path: benchmark/build/reports/jmh/results.json
+          if-no-files-found: error
+
+      - name: Summarize benchmark results
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESULT_FILE="benchmark/build/reports/jmh/results.json"
+          {
+            echo "## JMH Result Summary"
+            echo
+            echo "| Benchmark | Size | Score | Unit |"
+            echo "|---|---:|---:|---|"
+            jq -r '.[] | "| \(.benchmark) | \(.params.size // "-") | \(.primaryMetric.score | tostring) | \(.primaryMetric.scoreUnit) |"' "$RESULT_FILE"
+          } >> "$GITHUB_STEP_SUMMARY"
