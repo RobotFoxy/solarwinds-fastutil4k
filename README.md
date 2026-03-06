@@ -34,6 +34,8 @@ Provides higher-level collection utilities and data structures, including:
 - `Pool<E>`: reusable object pool with optional finalizer and synchronized wrapper
 - `LfuCache<K, V>`: non-thread-safe LFU cache with LRU tie-breaking
 - `WeightedSortedList<E>`: bounds-checked list sorted by element weight
+- weighted terminal operations for `Iterable` / `Sequence`:
+  `weightedFilterSortedBy*`, `weightedMinByOrNull*`, `weightedMaxByOrNull*`
 - stepped float/double ranges returning fastutil lists (`ClosedRange<Double>.step`, `ClosedRange<Float>.step`)
 
 ## Requirements
@@ -49,10 +51,11 @@ Provides higher-level collection utilities and data structures, including:
 
 ## Regenerate extension sources
 
-Generated extension sources are produced by module tasks in `fastutil4k-extensions-only`.
+Generated sources are produced by module tasks.
 
 ```bash
 ./gradlew :fastutil4k-extensions-only:generate-all
+./gradlew :fastutil4k-more-collections:weighted-terminal
 ```
 
 ## Dependency coordinates

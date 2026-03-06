@@ -36,6 +36,19 @@ List-like container sorted by weight:
 - optional inclusive/exclusive lower and upper bounds
 - exposes weight lookup through `Object2DoubleFunction<E>`
 
+### Weighted terminal operations (`Iterable` / `Sequence`)
+
+Generated weighted query terminal helpers:
+
+- `weightedFilterSortedBy(...)`
+- `weightedFilterSortedByAtMost(...)`
+- `weightedFilterSortedByAtLeast(...)`
+- `weightedFilterSortedByIn(...)`
+- `weightedMinByOrNull*`
+- `weightedMaxByOrNull*`
+
+The implementation computes each element's weight once and sorts in place via fastutil internals.
+
 ### Stepped ranges
 
 - `ClosedRange<Double>.step(step: Double): DoubleList`
@@ -79,4 +92,8 @@ cache["c"] = 3 // evicts "b"
 
 val steps = (0.0..1.0).step(0.25)
 println(steps) // [0.0, 0.25, 0.5, 0.75, 1.0]
+
+val targets = listOf("bbb", "a", "cc")
+val sorted = targets.weightedFilterSortedByAtMost(2.0) { it.length.toDouble() }
+val nearest = targets.weightedMinByOrNull { it.length.toDouble() }
 ```

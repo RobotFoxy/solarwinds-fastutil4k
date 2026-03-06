@@ -1,6 +1,5 @@
 package net.ccbluex.fastutil
 
-import it.unimi.dsi.fastutil.Arrays
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList
 import it.unimi.dsi.fastutil.objects.Object2DoubleFunction
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
@@ -266,10 +265,7 @@ private constructor(
 
         // stable sort by weight
         if (k > 1) {
-            Arrays.quickSort(0, k, { i, j -> resWs[i].compareTo(resWs[j]) }) { i, j ->
-                resEls.swap(i, j)
-                resWs.swap(i, j)
-            }
+            resEls.sortByWeightsInPlace(0, k, resWs)
         }
 
         val newSize = oldN + k
