@@ -731,6 +731,8 @@ val enumSetTask = tasks.register<GenerateSrcTask>("enum-set") {
             appendLine()
         }
 
+        appendLine("inline fun <reified E : Enum<E>> enumSetAllOf(): EnumSet<E> = EnumSet.allOf(E::class.java)")
+        appendLine()
         appendLine("inline fun <reified E : Enum<E>> EnumSet<E>.complement(): EnumSet<E> = EnumSet.complementOf(this)")
     }
 }
