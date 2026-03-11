@@ -56,7 +56,7 @@ val generateWeightedTerminalTask = tasks.register<GenerateSrcTask>("weighted-ter
         appendLine("    include: (Double) -> Boolean,")
         appendLine("): E? {")
         appendLine("    var found = false")
-        appendLine("    var minWeight = Double.MAX_VALUE")
+        appendLine("    var minWeight = Double.POSITIVE_INFINITY")
         appendLine("    var minElement: E? = null")
         appendLine()
         appendLine("    while (source.hasNext()) {")
