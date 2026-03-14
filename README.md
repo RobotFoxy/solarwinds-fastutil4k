@@ -93,10 +93,6 @@ Generated sources are produced by module tasks.
 
 ## Dependency coordinates
 
-Group:
-
-- `net.ccbluex`
-
 Artifacts:
 
 - `fastutil4k-extensions-only`
