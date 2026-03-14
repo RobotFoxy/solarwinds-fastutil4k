@@ -99,7 +99,3 @@ Artifacts:
 - `fastutil4k-more-collections`
 
 Version is defined in the root build script (`build.gradle.kts`).
-
-## License
-
-MIT. See [LICENSE](LICENSE).
